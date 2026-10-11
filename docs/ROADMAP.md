@@ -1,0 +1,28 @@
+# Stockly — Yol Haritası
+
+Kategori, ürün, tedarikçi ve stok hareketlerini izleyen küçük işletme stok yönetimi uygulaması.
+
+- **Önerilen repo adı:** `stockly`
+- **Teknoloji:** ASP.NET Core MVC (.NET 10), EF Core, SQL Server, Bootstrap 5 + özel SCSS, xUnit
+- **Kurallar:** `CONTRIBUTING.md` · **Tasarım:** `docs/DESIGN.md`
+
+Her aşama ayrı bir branch ve PR olarak yapılır (`stage/<no>-<kisa-ad>`). Bir aşama ancak tüm maddeleri bitince, build/testler geçince ve ekran görüntüleri eklenince tamamlanmış sayılır. Biten maddeler `[x]` yapılır.
+
+> Kapsam: Marketly'den farklılaşması için "Stockly" — küçük işletmeler için **stok yönetimi** (müşteri tarafı yok).
+
+## Aşama 1 — Veri modeli ve tasarım
+- [ ] Ad/marka "Stockly"; `docs/DESIGN.md` token'larıyla yeni layout (sol menü)
+- [ ] Entity'ler: Product, Category (mevcut), Supplier, StockMovement (giriş/çıkış/sayım)
+- [ ] EF Core migrations + seed verisi
+
+## Aşama 2 — Özellikler
+- [ ] Ürün CRUD (SKU, barkod, fiyat, kritik stok seviyesi, görsel)
+- [ ] Stok giriş/çıkış kaydı; anlık stok hesaplama; kritik stok uyarısı
+- [ ] Tedarikçi CRUD; ürün-tedarikçi ilişkisi
+- [ ] Dashboard: toplam stok değeri, kritik ürünler, son hareketler, aylık hareket grafiği
+- [ ] Mükerrer kategori kontrolü korunur; "TAMAMLANDI" TODO yorumları silinir
+
+## Aşama 3 — Cila, test, yayın
+- [ ] Arama/filtre/sayfalama, Excel/CSV dışa aktarma
+- [ ] Servis katmanı + xUnit testleri + GitHub Actions
+- [ ] Canlı demo, ekran görüntüleri, README (TR + EN)

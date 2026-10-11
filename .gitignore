@@ -1,0 +1,35 @@
+# Build
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+.vs/
+.vscode/
+.idea/
+TestResults/
+*.log
+
+# Secrets / local settings
+*.env
+.env.*
+!.env.example
+secrets.json
+*.pfx
+
+# Uploads / local data
+**/wwwroot/uploads/
+*.db
+*.db-shm
+*.db-wal
+
+# Local tooling
+.claude/
+CLAUDE.md
+docs/brief/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
