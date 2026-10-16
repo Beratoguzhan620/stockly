@@ -25,11 +25,12 @@ secrets.json
 *.db-wal
 
 # Local tooling
-.claude/
-CLAUDE.md
-docs/brief/
 
 # OS
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# UI preview
+tests/ui/node_modules/
+tests/ui/output/
