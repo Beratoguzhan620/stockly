@@ -1,0 +1,142 @@
+@model Stockly.Application.Dashboard.DashboardSummary
+@{
+    ViewData["Title"] = "Özet";
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    var months = Model.Monthly;
+    var max = Math.Max(1, months.Max(m => Math.Max(m.UnitsIn, m.UnitsOut)));
+    const int chartWidth = 720, chartHeight = 230, top = 20, bottom = 28;
+    var slot = chartWidth / (double)months.Count;
+    var barWidth = slot * 0.28;
+    var plotHeight = chartHeight - top - bottom;
+    string F(double v) => v.ToString("0.#", inv);
+}
+
+<partial name="Partials/_ViewMessages" />
+
+<div class="page-header">
+    <div>
+        <h1>Özet</h1>
+        <p>Stoğun bugünkü durumu, kritik ürünler ve son hareketler.</p>
+    </div>
+</div>
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <span class="label"><i class="bi bi-box-seam"></i>Aktif ürün</span>
+        <span class="value">@Display.Number(Model.ActiveProducts)</span>
+        <span class="hint">@Display.Number(Model.TotalUnits) birim stokta</span>
+    </div>
+    <div class="stat-card">
+        <span class="label"><i class="bi bi-cash-stack"></i>Stok değeri</span>
+        <span class="value">@Display.Money(Model.StockValue)</span>
+        <span class="hint">alış fiyatıyla</span>
+    </div>
+    <div class="stat-card @(Model.CriticalCount > 0 ? "attention" : null)">
+        <span class="label"><i class="bi bi-exclamation-triangle"></i>Kritik seviyede</span>
+        <span class="value">@Model.CriticalCount</span>
+        <span class="hint">@(Model.OutOfStockCount > 0 ? $"{Model.OutOfStockCount} ürün tükendi" : "tükenen ürün yok")</span>
+    </div>
+    <div class="stat-card">
+        <span class="label"><i class="bi bi-truck"></i>Tedarikçi</span>
+        <span class="value">@Model.SupplierCount</span>
+        <span class="hint">aktif</span>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-7">
+        <section class="card h-100" aria-labelledby="movementTitle">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <h2 class="h6 mb-0" id="movementTitle">Aylık giriş ve çıkış · son 6 ay</h2>
+                <span class="chart-legend small text-muted">
+                    <span><i class="legend-swatch in"></i>Giriş</span>
+                    <span><i class="legend-swatch out"></i>Çıkış</span>
+                </span>
+            </div>
+            <div class="card-body">
+                <svg class="chart" viewBox="0 0 @chartWidth @chartHeight" role="img" aria-labelledby="movementTitle movementDesc">
+                    <desc id="movementDesc">@string.Join(", ", months.Select(m => $"{Display.MonthShort(m.Year, m.Month)} {m.Year}: {m.UnitsIn} giriş, {m.UnitsOut} çıkış"))</desc>
+                    @for (var g = 0; g <= 2; g++)
+                    {
+                        var y = top + plotHeight * g / 2.0;
+                        <line class="gridline" x1="0" x2="@chartWidth" y1="@F(y)" y2="@F(y)" />
+                    }
+                    @for (var i = 0; i < months.Count; i++)
+                    {
+                        var m = months[i];
+                        var center = i * slot + slot / 2;
+                        var inHeight = m.UnitsIn <= 0 ? 2 : Math.Max(2, m.UnitsIn / (double)max * plotHeight);
+                        var outHeight = m.UnitsOut <= 0 ? 2 : Math.Max(2, m.UnitsOut / (double)max * plotHeight);
+                        <rect class="bar in" x="@F(center - barWidth - 2)" y="@F(top + plotHeight - inHeight)" width="@F(barWidth)" height="@F(inHeight)" rx="2">
+                            <title>@Display.MonthShort(m.Year, m.Month) @m.Year: @Display.Number(m.UnitsIn) birim giriş</title>
+                        </rect>
+                        <rect class="bar out" x="@F(center + 2)" y="@F(top + plotHeight - outHeight)" width="@F(barWidth)" height="@F(outHeight)" rx="2">
+                            <title>@Display.MonthShort(m.Year, m.Month) @m.Year: @Display.Number(m.UnitsOut) birim çıkış</title>
+                        </rect>
+                        // Razor reserves <text>, so SVG labels are written as raw markup.
+                        @:@Html.Raw($"<text class=\"axis\" x=\"{F(center)}\" y=\"{chartHeight - 8}\" text-anchor=\"middle\">{System.Net.WebUtility.HtmlEncode(Display.MonthShort(m.Year, m.Month))}</text>")
+                    }
+                </svg>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-xl-5">
+        <section class="card h-100" aria-labelledby="criticalTitle">
+            <div class="card-header"><h2 class="h6 mb-0" id="criticalTitle">Kritik seviyedeki ürünler</h2></div>
+            @if (Model.CriticalProducts.Count == 0)
+            {
+                <partial name="Partials/_EmptyState" model="@(("Kritik ürün yok", "Tüm ürünler kritik seviyenin üstünde.", "bi-check2-circle"))" />
+            }
+            else
+            {
+                <ul class="list-group list-group-flush">
+                    @foreach (var p in Model.CriticalProducts)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center gap-3">
+                            <span class="min-w-0">
+                                <span class="d-block fw-medium text-truncate">@p.Name</span>
+                                <span class="d-block text-muted small"><span class="font-mono">@p.Sku</span>@(p.SupplierName is null ? "" : $" · {p.SupplierName}")</span>
+                            </span>
+                            <span class="text-end text-nowrap">
+                                <span class="d-block font-mono @(p.StockQuantity == 0 ? "text-danger" : "text-warning-emphasis")">@p.StockQuantity @Display.Unit(p.Unit)</span>
+                                <span class="d-block text-muted small">kritik: @p.CriticalLevel</span>
+                            </span>
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
+    </div>
+</div>
+
+<section class="card mt-4" aria-labelledby="recentTitle">
+    <div class="card-header"><h2 class="h6 mb-0" id="recentTitle">Son hareketler</h2></div>
+    @if (Model.RecentMovements.Count == 0)
+    {
+        <partial name="Partials/_EmptyState" model="@(("Henüz hareket yok", "Stok girişi veya çıkışı yapıldığında burada görünür.", "bi-arrow-left-right"))" />
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr><th>Ürün</th><th>Tür</th><th class="num">Miktar</th><th class="num">Kalan</th><th>Tarih</th><th>Not</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model.RecentMovements)
+                    {
+                        <tr>
+                            <td class="fw-medium">@m.ProductName</td>
+                            <td><span class="@Display.MovementBadge(m.Type)">@Display.Movement(m.Type)</span></td>
+                            <td class="num">@Display.Signed(m.Quantity)</td>
+                            <td class="num">@m.BalanceAfter @Display.Unit(m.Unit)</td>
+                            <td class="text-muted text-nowrap">@Display.DateTime(m.OccurredAt)</td>
+                            <td class="text-muted">@m.Note</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

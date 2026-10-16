@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <partial name="Partials/_Head" />
+</head>
+<body>
+    <a class="visually-hidden-focusable skip-link" href="#main">İçeriğe geç</a>
+    <partial name="Partials/_Topbar" />
+
+    <div class="app-body">
+        <partial name="Partials/_Sidebar" />
+
+        <main class="app-main" id="main">
+            <div class="app-content">
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+
+    <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="false"></div>
+    <partial name="Partials/_ConfirmModal" />
+
+    <partial name="Partials/_Scripts" />
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

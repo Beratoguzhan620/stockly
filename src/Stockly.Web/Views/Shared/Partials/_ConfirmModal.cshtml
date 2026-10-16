@@ -1,0 +1,18 @@
+@*
+    Shared confirmation dialog. Any form or link with data-confirm="Mesaj" asks before continuing.
+    Optional attributes: data-confirm-title, data-confirm-ok (button text), data-confirm-variant="danger".
+*@
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px">
+        <div class="modal-content">
+            <div class="modal-body p-4">
+                <h2 class="h5 mb-2" id="confirmModalTitle">Emin misiniz?</h2>
+                <p class="text-muted mb-0 small" data-confirm-message>Bu işlem geri alınamaz.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                <button type="button" class="btn btn-danger" data-confirm-accept>Onayla</button>
+            </div>
+        </div>
+    </div>
+</div>

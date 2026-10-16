@@ -1,0 +1,25 @@
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    string Active(string name) => string.Equals(controller, name, StringComparison.OrdinalIgnoreCase) ? " active" : string.Empty;
+    string? Current(string name) => Active(name).Length > 0 ? "page" : null;
+}
+
+<aside class="app-sidebar offcanvas-lg offcanvas-start" id="appSidebar" tabindex="-1" aria-label="Ana menü">
+    <div class="offcanvas-header border-bottom d-lg-none">
+        <a class="brand" asp-controller="Home" asp-action="Index"><span class="brand-mark" style="background: var(--sk-accent)">S</span>Stockly</a>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#appSidebar" aria-label="Kapat"></button>
+    </div>
+
+    <div class="sidebar-inner">
+        <nav>
+            <div class="nav-section-title">Genel</div>
+            <a class="side-link@(Active("Home"))" aria-current="@Current("Home")" asp-controller="Home" asp-action="Index"><i class="bi bi-speedometer2"></i>Özet</a>
+        </nav>
+        <nav>
+            <div class="nav-section-title">Katalog</div>
+            <a class="side-link@(Active("Categories"))" aria-current="@Current("Categories")" asp-controller="Categories" asp-action="Index"><i class="bi bi-tags"></i>Kategoriler</a>
+        </nav>
+
+        <div class="sidebar-footer">Stockly · @DateTime.UtcNow.Year</div>
+    </div>
+</aside>
