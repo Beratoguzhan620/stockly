@@ -1,0 +1,62 @@
+@model List<Stockly.Application.Categories.CategoryRow>
+@{
+    ViewData["Title"] = "Kategoriler";
+}
+
+<partial name="Partials/_ViewMessages" />
+
+<div class="page-header">
+    <div>
+        <h1>Kategoriler</h1>
+        <p>Ürünleri gruplamak için kullanılır. İçinde ürün olan kategori silinemez.</p>
+    </div>
+    <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i>Yeni kategori</a>
+</div>
+
+<div class="card">
+    @if (Model.Count == 0)
+    {
+        <partial name="Partials/_EmptyState" model="@(("Henüz kategori yok", "İlk kategoriyi ekleyerek başlayın.", "bi-tags"))" />
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Kategori</th>
+                        <th class="num">Ürün</th>
+                        <th class="num">Kritik</th>
+                        <th><span class="visually-hidden">İşlemler</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model)
+                    {
+                        <tr>
+                            <td class="fw-medium">@c.Name</td>
+                            <td class="num">@c.ProductCount</td>
+                            <td class="num">
+                                @if (c.CriticalCount > 0)
+                                {
+                                    <span class="badge badge-warning">@c.CriticalCount</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                            <td class="text-end text-nowrap">
+                                <a class="btn btn-outline-secondary btn-sm" asp-action="Edit" asp-route-id="@c.Id">Düzenle</a>
+                                <form class="d-inline" method="post" asp-action="Delete" asp-route-id="@c.Id">
+                                    <button class="btn btn-ghost btn-sm" type="submit"
+                                            data-confirm="&quot;@c.Name&quot; kategorisi silinecek." data-confirm-title="Kategoriyi sil" data-confirm-ok="Sil">Sil</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

@@ -1,0 +1,25 @@
+@{
+    var errors = ViewData.ModelState
+        .Where(kv => string.IsNullOrEmpty(kv.Key))
+        .SelectMany(kv => kv.Value!.Errors)
+        .Select(e => e.ErrorMessage)
+        .Where(m => !string.IsNullOrWhiteSpace(m))
+        .ToList();
+    var success = ViewBag.SuccessMessage as string ?? TempData["SuccessMessage"] as string;
+    var error = ViewBag.ErrorMessage as string ?? TempData["ErrorMessage"] as string;
+}
+@if (!string.IsNullOrWhiteSpace(success))
+{
+    <div class="app-toast app-toast-success" role="status" data-toast hidden>
+        <i class="bi bi-check-circle"></i><span>@success</span>
+        <button type="button" class="btn-close" aria-label="Kapat" data-toast-close></button>
+    </div>
+}
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger" role="alert"><i class="bi bi-exclamation-circle"></i><span>@error</span></div>
+}
+@foreach (var message in errors)
+{
+    <div class="alert alert-danger" role="alert"><i class="bi bi-exclamation-circle"></i><span>@message</span></div>
+}

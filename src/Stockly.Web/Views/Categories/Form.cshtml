@@ -1,0 +1,39 @@
+@model CategoryFormViewModel
+@{
+    var isEdit = Model.Id is not null;
+    ViewData["Title"] = isEdit ? "Kategoriyi düzenle" : "Yeni kategori";
+}
+
+<div class="page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-action="Index">Kategoriler</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@(isEdit ? "Düzenle" : "Yeni")</li>
+            </ol>
+        </nav>
+        <h1>@ViewData["Title"]</h1>
+    </div>
+</div>
+
+<div class="card form-card">
+    <div class="card-body p-4">
+        <partial name="Partials/_ViewMessages" />
+        <form method="post" asp-action="@(isEdit ? "Edit" : "Create")" asp-route-id="@Model.Id" novalidate>
+            <div class="mb-4">
+                <label class="form-label" asp-for="Name"></label>
+                <input class="form-control" asp-for="Name" placeholder="Ör. Kâğıt ürünleri" autocomplete="off" autofocus />
+                <div class="form-text">Aynı adı taşıyan iki kategori olamaz; büyük-küçük harf fark etmez.</div>
+                <span asp-validation-for="Name"></span>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">@(isEdit ? "Kaydet" : "Kategoriyi ekle")</button>
+                <a class="btn btn-outline-secondary" asp-action="Index">Vazgeç</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

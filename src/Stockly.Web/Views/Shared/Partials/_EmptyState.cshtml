@@ -1,0 +1,6 @@
+@model (string Title, string Description, string Icon)
+<div class="empty-state m-3">
+    <div class="empty-state-icon"><i class="bi @Model.Icon"></i></div>
+    <h2>@Model.Title</h2>
+    <p>@Model.Description</p>
+</div>

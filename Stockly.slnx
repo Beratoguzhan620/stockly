@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Stockly.Application/Stockly.Application.csproj" />
+    <Project Path="src/Stockly.Data/Stockly.Data.csproj" />
+    <Project Path="src/Stockly.Web/Stockly.Web.csproj" />
+  </Folder>
+</Solution>

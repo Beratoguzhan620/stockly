@@ -1,0 +1,88 @@
+name: UI preview
+
+# Boots the app against a throwaway SQL Server with demo data, walks through the main screens
+# with Playwright and publishes desktop and 360px screenshots to a preview branch.
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: "Preview#Passw0rd"
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P 'Preview#Passw0rd' -Q 'SELECT 1' || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 12
+
+    env:
+      ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=StocklyPreview;User Id=sa;Password=Preview#Passw0rd;TrustServerCertificate=True;"
+      Seed__DemoContent: "true"
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: "http://localhost:5080"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Start app
+        run: |
+          dotnet build src/Stockly.Web/Stockly.Web.csproj --configuration Release
+          nohup dotnet run --project src/Stockly.Web/Stockly.Web.csproj --configuration Release --no-build --no-launch-profile > app.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:5080/ > /dev/null; then echo "App is up"; exit 0; fi
+            sleep 2
+          done
+          cat app.log
+          exit 1
+
+      - name: Install Playwright
+        working-directory: tests/ui
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Capture screenshots
+        working-directory: tests/ui
+        env:
+          BASE_URL: http://localhost:5080
+        run: |
+          set -o pipefail
+          mkdir -p output
+          node screenshots.mjs 2>&1 | tee output/run.log
+
+      # Published on failure too, with the log, so a broken run can be inspected.
+      - name: Publish screenshots to preview branch
+        if: always()
+        env:
+          PREVIEW_BRANCH: ui-preview/${{ github.head_ref || github.ref_name }}
+        run: |
+          mkdir -p tests/ui/output
+          cp app.log tests/ui/output/app.log 2>/dev/null || true
+          cd tests/ui/output
+          git init -q
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -q -m "UI preview for ${GITHUB_SHA::7}"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "HEAD:refs/heads/${PREVIEW_BRANCH}"
