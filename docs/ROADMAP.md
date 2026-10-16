@@ -16,10 +16,10 @@ Her aşama ayrı bir branch ve PR olarak yapılır (`stage/<no>-<kisa-ad>`). Bir
 - [x] EF Core migrations + seed verisi
 
 ## Aşama 2 — Özellikler
-- [ ] Ürün CRUD (SKU, barkod, fiyat, kritik stok seviyesi, görsel)
-- [ ] Stok giriş/çıkış kaydı; anlık stok hesaplama; kritik stok uyarısı
-- [ ] Tedarikçi CRUD; ürün-tedarikçi ilişkisi
-- [ ] Dashboard: toplam stok değeri, kritik ürünler, son hareketler, aylık hareket grafiği
+- [x] Ürün CRUD (SKU, barkod, fiyat, kritik stok seviyesi, görsel)
+- [x] Stok giriş/çıkış kaydı; anlık stok hesaplama; kritik stok uyarısı
+- [x] Tedarikçi CRUD; ürün-tedarikçi ilişkisi
+- [x] Dashboard: toplam stok değeri, kritik ürünler, son hareketler, aylık hareket grafiği
 - [x] Mükerrer kategori kontrolü korunur; "TAMAMLANDI" TODO yorumları silinir
 
 ## Aşama 3 — Cila, test, yayın
