@@ -4,21 +4,22 @@ using Stockly.Data.Entities;
 namespace Stockly.Data.Seeding;
 
 /// <summary>
-/// Fills an empty database with a small stationery shop: six categories, four suppliers, thirty products
-/// and about four months of stock movements ending today, so the dashboard and history have real-looking data.
+/// Fills an empty database with a small stationery shop: six categories, five suppliers, thirty products
+/// and about six months of stock movements ending today, so the dashboard and history have real-looking data.
 /// The data is generated from a fixed seed, so every install looks the same apart from the dates.
 /// </summary>
 public static class DemoDataSeeder
 {
-    private const int HistoryDays = 120;
-
     public static async Task SeedAsync(AppDbContext context, TimeProvider timeProvider)
     {
         if (await context.Products.AnyAsync() || await context.Categories.AnyAsync())
             return;
 
         var today = timeProvider.GetUtcNow().UtcDateTime.Date;
-        var start = today.AddDays(-HistoryDays);
+
+        // Opening stock lands two weeks before the six months the dashboard chart shows,
+        // so the chart starts with ordinary trading instead of one big delivery.
+        var start = new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-5).AddDays(-14);
 
         var categories = CategoryNames.ToDictionary(c => c.Key, c => new Category { Name = c.Value, CreatedAt = start.AddHours(8) });
         var suppliers = Suppliers.Select(s => new Supplier
@@ -89,7 +90,7 @@ public static class DemoDataSeeder
             if (day.DayOfWeek == DayOfWeek.Sunday)
                 continue;
 
-            var stopRestocking = spec.RunsLow && (today - day).TotalDays < 25;
+            var stopRestocking = spec.RunsLow && (today - day).TotalDays < 45;
 
             if (restockDue is not null && day >= restockDue && !stopRestocking)
             {
@@ -107,9 +108,9 @@ public static class DemoDataSeeder
             if (stock <= spec.Critical && restockDue is null)
                 restockDue = day.AddDays(random.Next(2, 5));
 
-            // A count every 40 days finds the odd missing item.
-            if ((day - start).Days % 40 == 0 && random.NextDouble() < 0.35 && stock > 2)
-                Move(MovementType.Count, -1, day.AddHours(19), "Sayım farkı");
+            // The month-end count finds the odd missing item.
+            if (day.Day == 28 && random.NextDouble() < 0.25 && stock > 2)
+                Move(MovementType.Count, -1, day.AddHours(19), "Ay sonu sayımı");
         }
 
         product.StockQuantity = stock;
