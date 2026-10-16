@@ -15,6 +15,8 @@ builder.Services.AddControllersWithViews(options =>
 builder.Services.AddStocklyData(builder.Configuration.GetConnectionString("DefaultConnection"));
 builder.Services.AddStocklyServices();
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<Stockly.Web.Infrastructure.ImageStorage>();
+builder.Services.AddScoped<Stockly.Web.Infrastructure.Lookups>();
 
 var app = builder.Build();
 
@@ -36,6 +38,9 @@ app.UseRequestLocalization(new RequestLocalizationOptions
 
 app.UseStatusCodePagesWithReExecute("/not-found");
 app.UseHttpsRedirection();
+
+// Product photos uploaded at runtime are not part of the build-time static asset manifest.
+app.UseStaticFiles();
 app.UseRouting();
 
 app.MapStaticAssets();

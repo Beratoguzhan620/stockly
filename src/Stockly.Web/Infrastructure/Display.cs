@@ -43,8 +43,19 @@ public static class Display
 
     public static string Signed(int value) => value > 0 ? $"+{value.ToString("N0", Turkish)}" : value.ToString("N0", Turkish);
 
-    private static DateTime ToLocal(DateTime utc) =>
-        TimeZoneInfo.ConvertTimeFromUtc(System.DateTime.SpecifyKind(utc, DateTimeKind.Utc), Istanbul);
+    public static string InputDate(DateTime utc) => ToLocal(utc).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
+    private static DateTime ToLocal(DateTime utc) => LocalTime.FromUtc(utc);
+}
+
+/// <summary>The shop works in Istanbul time; the database stores UTC.</summary>
+public static class LocalTime
+{
     private static readonly TimeZoneInfo Istanbul = TimeZoneInfo.FindSystemTimeZoneById("Europe/Istanbul");
+
+    public static DateTime FromUtc(DateTime utc) =>
+        TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(utc, DateTimeKind.Utc), Istanbul);
+
+    public static DateTime ToUtc(DateTime local) =>
+        TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(local, DateTimeKind.Unspecified), Istanbul);
 }
