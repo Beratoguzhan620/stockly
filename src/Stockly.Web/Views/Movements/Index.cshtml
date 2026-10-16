@@ -1,0 +1,74 @@
+@model MovementListViewModel
+@{
+    ViewData["Title"] = "Hareketler";
+    var q = Model.Query;
+    var filtered = q.ProductId is not null || q.Type is not null || q.From is not null || q.To is not null;
+}
+
+<partial name="Partials/_ViewMessages" />
+
+<div class="page-header">
+    <div>
+        <h1>Hareketler</h1>
+        <p>Her giriş, çıkış ve sayım; en yenisi en üstte. Hareketler değiştirilmez, hata yeni bir hareketle düzeltilir.</p>
+    </div>
+    <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i>Hareket gir</a>
+</div>
+
+<div class="card">
+    <form class="filter-bar" method="get" asp-action="Index">
+        <select class="form-select form-select-sm" name="productId" aria-label="Ürün">
+            <option value="">Tüm ürünler</option>
+            @foreach (var p in Model.Products)
+            {
+                <option value="@p.Value" selected="@(q.ProductId?.ToString() == p.Value)">@p.Text</option>
+            }
+        </select>
+        <select class="form-select form-select-sm" name="type" aria-label="Tür">
+            <option value="">Tüm türler</option>
+            <option value="In" selected="@(q.Type == MovementType.In)">Giriş</option>
+            <option value="Out" selected="@(q.Type == MovementType.Out)">Çıkış</option>
+            <option value="Count" selected="@(q.Type == MovementType.Count)">Sayım</option>
+        </select>
+        <input class="form-control form-control-sm date-input" type="date" name="from" value="@(q.From?.ToString("yyyy-MM-dd"))" aria-label="Başlangıç tarihi" />
+        <input class="form-control form-control-sm date-input" type="date" name="to" value="@(q.To?.ToString("yyyy-MM-dd"))" aria-label="Bitiş tarihi" />
+        <button class="btn btn-outline-secondary btn-sm" type="submit">Filtrele</button>
+        @if (filtered)
+        {
+            <a class="btn btn-ghost btn-sm" asp-action="Index">Temizle</a>
+        }
+    </form>
+
+    @if (Model.Result.Items.Count == 0)
+    {
+        <partial name="Partials/_EmptyState" model="@(("Hareket bulunamadı", "Filtreleri değiştirerek tekrar deneyin.", "bi-arrow-left-right"))" />
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr><th>Tarih</th><th>Ürün</th><th>Tür</th><th class="num">Miktar</th><th class="num">Kalan</th><th>Not</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model.Result.Items)
+                    {
+                        <tr>
+                            <td class="text-muted text-nowrap">@Display.DateTime(m.OccurredAt)</td>
+                            <td>
+                                <a class="fw-medium" asp-controller="Products" asp-action="Detail" asp-route-id="@m.ProductId">@m.ProductName</a>
+                                <span class="d-block text-muted small font-mono">@m.Sku</span>
+                            </td>
+                            <td><span class="@Display.MovementBadge(m.Type)">@Display.Movement(m.Type)</span></td>
+                            <td class="num @(m.Quantity > 0 ? "text-success" : null)">@Display.Signed(m.Quantity)</td>
+                            <td class="num text-nowrap">@m.BalanceAfter @Display.Unit(m.Unit)</td>
+                            <td class="text-muted">@m.Note</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <partial name="Partials/_Pager" model="Model.Pager" />
+</div>

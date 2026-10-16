@@ -1,0 +1,133 @@
+@model ProductFormViewModel
+@{
+    var isEdit = Model.Id is not null;
+    ViewData["Title"] = isEdit ? "Ürünü düzenle" : "Yeni ürün";
+    var units = Enum.GetValues<ProductUnit>().Select(u => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(Display.Unit(u), u.ToString()));
+}
+
+<div class="page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-action="Index">Ürünler</a></li>
+                @if (isEdit)
+                {
+                    <li class="breadcrumb-item"><a asp-action="Detail" asp-route-id="@Model.Id">@Model.Name</a></li>
+                }
+                <li class="breadcrumb-item active" aria-current="page">@(isEdit ? "Düzenle" : "Yeni")</li>
+            </ol>
+        </nav>
+        <h1>@ViewData["Title"]</h1>
+    </div>
+</div>
+
+<form class="card form-card wide" method="post" enctype="multipart/form-data" asp-action="@(isEdit ? "Edit" : "Create")" asp-route-id="@Model.Id" novalidate>
+    <div class="card-body p-4">
+        <partial name="Partials/_ViewMessages" />
+
+        <fieldset class="form-section">
+            <legend>Tanım</legend>
+            <div class="row g-3">
+                <div class="col-sm-4">
+                    <label class="form-label" asp-for="Sku"></label>
+                    <input class="form-control font-mono text-uppercase" asp-for="Sku" placeholder="KAG-031" autocomplete="off" spellcheck="false" />
+                    <span asp-validation-for="Sku"></span>
+                </div>
+                <div class="col-sm-8">
+                    <label class="form-label" asp-for="Barcode"></label>
+                    <input class="form-control font-mono" asp-for="Barcode" inputmode="numeric" placeholder="Barkod okuyucuyla okutabilirsiniz" autocomplete="off" />
+                    <div class="form-text">İsteğe bağlı. 13 haneli EAN barkodlarında kontrol hanesi doğrulanır.</div>
+                    <span asp-validation-for="Barcode"></span>
+                </div>
+                <div class="col-12">
+                    <label class="form-label" asp-for="Name"></label>
+                    <input class="form-control" asp-for="Name" placeholder="Ör. A4 fotokopi kâğıdı 80 g" />
+                    <span asp-validation-for="Name"></span>
+                </div>
+                <div class="col-sm-6">
+                    <label class="form-label" asp-for="CategoryId"></label>
+                    <select class="form-select" asp-for="CategoryId" asp-items="Model.Categories">
+                        <option value="0">Kategori seçin</option>
+                    </select>
+                    <span asp-validation-for="CategoryId"></span>
+                </div>
+                <div class="col-sm-6">
+                    <label class="form-label" asp-for="SupplierId"></label>
+                    <select class="form-select" asp-for="SupplierId" asp-items="Model.Suppliers">
+                        <option value="">Tedarikçi yok</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label" asp-for="Description"></label>
+                    <textarea class="form-control" asp-for="Description" rows="2"></textarea>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="form-section">
+            <legend>Fiyat ve stok</legend>
+            <div class="row g-3">
+                <div class="col-sm-4">
+                    <label class="form-label" asp-for="Unit"></label>
+                    <select class="form-select" asp-for="Unit" asp-items="units"></select>
+                </div>
+                <div class="col-sm-4">
+                    <label class="form-label" asp-for="PurchasePrice"></label>
+                    <input class="form-control" asp-for="PurchasePrice" type="number" min="0" step="0.01" />
+                    <span asp-validation-for="PurchasePrice"></span>
+                </div>
+                <div class="col-sm-4">
+                    <label class="form-label" asp-for="SalePrice"></label>
+                    <input class="form-control" asp-for="SalePrice" type="number" min="0" step="0.01" />
+                    <span asp-validation-for="SalePrice"></span>
+                </div>
+                <div class="col-sm-4">
+                    <label class="form-label" asp-for="CriticalLevel"></label>
+                    <input class="form-control" asp-for="CriticalLevel" type="number" min="0" />
+                    <div class="form-text">Stok bu sayıya inince uyarı verilir.</div>
+                    <span asp-validation-for="CriticalLevel"></span>
+                </div>
+                <div class="col-sm-8">
+                    @if (isEdit)
+                    {
+                        <label class="form-label">Mevcut stok</label>
+                        <p class="form-control-plaintext"><span class="font-mono">@Model.CurrentStock</span> · stok yalnızca giriş, çıkış veya sayımla değişir.</p>
+                    }
+                    else
+                    {
+                        <label class="form-label" asp-for="OpeningStock"></label>
+                        <input class="form-control" asp-for="OpeningStock" type="number" min="0" />
+                        <div class="form-text">0'dan büyükse ilk giriş hareketi olarak kaydedilir.</div>
+                        <span asp-validation-for="OpeningStock"></span>
+                    }
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="form-section">
+            <legend>Görsel</legend>
+            @if (Model.CurrentImageUrl is not null)
+            {
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <img class="product-thumb-lg" src="@Model.CurrentImageUrl" alt="Mevcut görsel" />
+                    <div class="form-check">
+                        <input class="form-check-input" asp-for="RemoveImage" />
+                        <label class="form-check-label" asp-for="RemoveImage"></label>
+                    </div>
+                </div>
+            }
+            <input class="form-control" asp-for="Image" type="file" accept="image/jpeg,image/png,image/webp" />
+            <div class="form-text">JPG, PNG veya WEBP; en fazla 2 MB.</div>
+            <span asp-validation-for="Image"></span>
+        </fieldset>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">@(isEdit ? "Kaydet" : "Ürünü ekle")</button>
+            <a class="btn btn-outline-secondary" asp-action="@(isEdit ? "Detail" : "Index")" asp-route-id="@Model.Id">Vazgeç</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
