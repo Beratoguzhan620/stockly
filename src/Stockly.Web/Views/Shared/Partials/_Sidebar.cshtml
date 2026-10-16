@@ -16,8 +16,15 @@
             <a class="side-link@(Active("Home"))" aria-current="@Current("Home")" asp-controller="Home" asp-action="Index"><i class="bi bi-speedometer2"></i>Özet</a>
         </nav>
         <nav>
+            <div class="nav-section-title">Stok</div>
+            <a class="side-link@(Active("Movements"))" aria-current="@Current("Movements")" asp-controller="Movements" asp-action="Index"><i class="bi bi-arrow-left-right"></i>Hareketler</a>
+            <a class="side-link" asp-controller="Movements" asp-action="Create"><i class="bi bi-plus-square"></i>Hareket gir</a>
+        </nav>
+        <nav>
             <div class="nav-section-title">Katalog</div>
+            <a class="side-link@(Active("Products"))" aria-current="@Current("Products")" asp-controller="Products" asp-action="Index"><i class="bi bi-box-seam"></i>Ürünler</a>
             <a class="side-link@(Active("Categories"))" aria-current="@Current("Categories")" asp-controller="Categories" asp-action="Index"><i class="bi bi-tags"></i>Kategoriler</a>
+            <a class="side-link@(Active("Suppliers"))" aria-current="@Current("Suppliers")" asp-controller="Suppliers" asp-action="Index"><i class="bi bi-truck"></i>Tedarikçiler</a>
         </nav>
 
         <div class="sidebar-footer">Stockly · @DateTime.UtcNow.Year</div>

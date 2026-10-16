@@ -1,0 +1,85 @@
+@model StockEntryViewModel
+@{
+    ViewData["Title"] = "Hareket gir";
+    var types = new[] { (MovementType.In, "Giriş", "Tedarikçiden gelen veya iade alınan ürün"), (MovementType.Out, "Çıkış", "Satış, fire veya iç kullanım"), (MovementType.Count, "Sayım", "Sayılan miktarı girin; fark kaydedilir") };
+}
+
+<div class="page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-action="Index">Hareketler</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Yeni</li>
+            </ol>
+        </nav>
+        <h1>Hareket gir</h1>
+    </div>
+</div>
+
+<form class="card form-card" method="post" asp-action="Create" novalidate>
+    <div class="card-body p-4">
+        <partial name="Partials/_ViewMessages" />
+
+        <fieldset class="mb-3">
+            <legend class="form-label">Hareket türü</legend>
+            <div class="choice-grid">
+                @foreach (var (value, label, hint) in types)
+                {
+                    <label class="choice">
+                        <input class="form-check-input" type="radio" name="Type" value="@value" checked="@(Model.Type == value)" data-movement-type />
+                        <span><span class="fw-medium d-block">@label</span><span class="text-muted small">@hint</span></span>
+                    </label>
+                }
+            </div>
+        </fieldset>
+
+        <div class="mb-3">
+            <label class="form-label" asp-for="ProductId"></label>
+            <select class="form-select" asp-for="ProductId" asp-items="Model.Products">
+                <option value="0">Ürün seçin</option>
+            </select>
+            <span asp-validation-for="ProductId"></span>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+                <label class="form-label" asp-for="Quantity" data-quantity-label>@(Model.Type == MovementType.Count ? "Sayılan miktar" : "Miktar")</label>
+                <input class="form-control" asp-for="Quantity" type="number" min="0" />
+                <span asp-validation-for="Quantity"></span>
+            </div>
+            <div class="col-sm-6" data-cost-field hidden="@(Model.Type != MovementType.In)">
+                <label class="form-label" asp-for="UnitCost"></label>
+                <input class="form-control" asp-for="UnitCost" type="number" min="0" step="0.01" placeholder="Ürünün alış fiyatı" />
+                <span asp-validation-for="UnitCost"></span>
+            </div>
+            <div class="col-sm-6">
+                <label class="form-label" asp-for="OccurredAt"></label>
+                <input class="form-control" asp-for="OccurredAt" type="datetime-local" />
+                <div class="form-text">Boş bırakılırsa şu an.</div>
+            </div>
+            <div class="col-12">
+                <label class="form-label" asp-for="Note"></label>
+                <input class="form-control" asp-for="Note" placeholder="Ör. irsaliye no, satış, fire" />
+                <span asp-validation-for="Note"></span>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Kaydet</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Vazgeç</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Unit cost only applies to goods in; a count asks for the counted quantity.
+        document.querySelectorAll("[data-movement-type]").forEach(function (radio) {
+            radio.addEventListener("change", function () {
+                document.querySelector("[data-cost-field]").hidden = radio.value !== "In";
+                document.querySelector("[data-quantity-label]").textContent = radio.value === "Count" ? "Sayılan miktar" : "Miktar";
+            });
+        });
+    </script>
+}

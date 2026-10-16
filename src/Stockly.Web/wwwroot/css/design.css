@@ -301,6 +301,7 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 }
 
 .alert-danger { background: var(--sk-danger-soft); border-color: #EFCFCB; color: var(--sk-danger); }
+.alert-warning { background: var(--sk-warning-soft); border-color: #EBD9B8; color: #8A5A12; }
 .alert-success { background: var(--sk-success-soft); border-color: #CFE3D7; color: var(--sk-success); }
 .alert-info-soft { background: var(--sk-accent-soft); border: 1px solid #D6DBC0; color: var(--sk-accent); }
 

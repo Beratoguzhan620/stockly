@@ -1,0 +1,111 @@
+@model ProductListViewModel
+@using Stockly.Application.Products
+@{
+    ViewData["Title"] = "Ürünler";
+    var q = Model.Query;
+    var filtered = !string.IsNullOrEmpty(q.Search) || q.CategoryId is not null || q.SupplierId is not null || q.Stock != StockFilter.All || q.Status != ActiveFilter.Active;
+}
+
+<partial name="Partials/_ViewMessages" />
+
+<div class="page-header">
+    <div>
+        <h1>Ürünler</h1>
+        <p>SKU, barkod veya adla arayın; kritik seviyedeki ürünleri tek tıkla listeleyin.</p>
+    </div>
+    <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i>Yeni ürün</a>
+</div>
+
+<div class="card">
+    <form class="filter-bar" method="get" asp-action="Index" role="search">
+        <div class="search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input class="form-control form-control-sm" type="search" name="search" value="@q.Search" placeholder="Ad, SKU veya barkod" aria-label="Ad, SKU veya barkod" />
+        </div>
+        <select class="form-select form-select-sm" name="categoryId" aria-label="Kategori">
+            <option value="">Tüm kategoriler</option>
+            @foreach (var c in Model.Categories)
+            {
+                <option value="@c.Value" selected="@(q.CategoryId?.ToString() == c.Value)">@c.Text</option>
+            }
+        </select>
+        <select class="form-select form-select-sm" name="supplierId" aria-label="Tedarikçi">
+            <option value="">Tüm tedarikçiler</option>
+            @foreach (var s in Model.Suppliers)
+            {
+                <option value="@s.Value" selected="@(q.SupplierId?.ToString() == s.Value)">@s.Text</option>
+            }
+        </select>
+        <select class="form-select form-select-sm" name="stock" aria-label="Stok durumu">
+            <option value="All" selected="@(q.Stock == StockFilter.All)">Tüm stok durumları</option>
+            <option value="Critical" selected="@(q.Stock == StockFilter.Critical)">Kritik seviyede</option>
+            <option value="OutOfStock" selected="@(q.Stock == StockFilter.OutOfStock)">Tükenenler</option>
+        </select>
+        <select class="form-select form-select-sm" name="status" aria-label="Durum">
+            <option value="Active" selected="@(q.Status == ActiveFilter.Active)">Aktif ürünler</option>
+            <option value="Inactive" selected="@(q.Status == ActiveFilter.Inactive)">Arşivdekiler</option>
+            <option value="All" selected="@(q.Status == ActiveFilter.All)">Tümü</option>
+        </select>
+        <button class="btn btn-outline-secondary btn-sm" type="submit">Filtrele</button>
+        @if (filtered)
+        {
+            <a class="btn btn-ghost btn-sm" asp-action="Index">Temizle</a>
+        }
+    </form>
+
+    @if (Model.Result.Items.Count == 0)
+    {
+        <partial name="Partials/_EmptyState" model="@(filtered
+            ? ("Ürün bulunamadı", "Filtreleri değiştirerek tekrar deneyin.", "bi-search")
+            : ("Henüz ürün yok", "İlk ürünü ekleyerek başlayın.", "bi-box-seam"))" />
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table mb-0 product-table">
+                <thead>
+                    <tr>
+                        <th>Ürün</th>
+                        <th>Kategori</th>
+                        <th class="num">Stok</th>
+                        <th class="num">Alış</th>
+                        <th class="num">Satış</th>
+                        <th class="num d-none d-xl-table-cell">Stok değeri</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.Result.Items)
+                    {
+                        <tr class="@(p.IsActive ? null : "row-muted")">
+                            <td>
+                                <a class="product-link" asp-action="Detail" asp-route-id="@p.Id">
+                                    <span class="product-thumb">
+                                        @if (p.ImageUrl is not null)
+                                        {
+                                            <img src="@p.ImageUrl" alt="" loading="lazy" />
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-box" aria-hidden="true"></i>
+                                        }
+                                    </span>
+                                    <span class="min-w-0">
+                                        <span class="d-block fw-medium text-truncate">@p.Name</span>
+                                        <span class="d-block text-muted small"><span class="font-mono">@p.Sku</span>@(p.IsActive ? "" : " · arşivde")</span>
+                                    </span>
+                                </a>
+                            </td>
+                            <td class="text-muted">@p.CategoryName</td>
+                            <td class="num text-nowrap"><partial name="Partials/_StockLevel" model="@((p.StockQuantity, p.CriticalLevel, p.Unit))" /></td>
+                            <td class="num text-nowrap">@Display.Money(p.PurchasePrice)</td>
+                            <td class="num text-nowrap">@Display.Money(p.SalePrice)</td>
+                            <td class="num text-nowrap d-none d-xl-table-cell">@Display.Money(p.StockValue)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <partial name="Partials/_Pager" model="Model.Pager" />
+</div>
