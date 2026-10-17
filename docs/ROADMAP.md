@@ -23,6 +23,7 @@ Her aşama ayrı bir branch ve PR olarak yapılır (`stage/<no>-<kisa-ad>`). Bir
 - [x] Mükerrer kategori kontrolü korunur; "TAMAMLANDI" TODO yorumları silinir
 
 ## Aşama 3 — Cila, test, yayın
-- [ ] Arama/filtre/sayfalama, Excel/CSV dışa aktarma
-- [ ] Servis katmanı + xUnit testleri + GitHub Actions
-- [ ] Canlı demo, ekran görüntüleri, README (TR + EN)
+- [x] Arama/filtre/sayfalama, Excel/CSV dışa aktarma
+- [x] Servis katmanı + xUnit testleri + GitHub Actions
+- [x] Ekran görüntüleri, README (TR + EN)
+- [ ] Canlı demo
