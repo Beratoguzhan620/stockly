@@ -4,4 +4,7 @@
     <Project Path="src/Stockly.Data/Stockly.Data.csproj" />
     <Project Path="src/Stockly.Web/Stockly.Web.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Stockly.Application.Tests/Stockly.Application.Tests.csproj" />
+  </Folder>
 </Solution>
