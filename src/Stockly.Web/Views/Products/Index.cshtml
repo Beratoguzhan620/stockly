@@ -13,7 +13,10 @@
         <h1>Ürünler</h1>
         <p>SKU, barkod veya adla arayın; kritik seviyedeki ürünleri tek tıkla listeleyin.</p>
     </div>
-    <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i>Yeni ürün</a>
+    <div class="d-flex flex-wrap gap-2">
+        <partial name="Partials/_ExportMenu" model="@Url.Action("Export")" />
+        <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i>Yeni ürün</a>
+    </div>
 </div>
 
 <div class="card">

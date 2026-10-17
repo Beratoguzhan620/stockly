@@ -12,7 +12,10 @@
         <h1>Hareketler</h1>
         <p>Her giriş, çıkış ve sayım; en yenisi en üstte. Hareketler değiştirilmez, hata yeni bir hareketle düzeltilir.</p>
     </div>
-    <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i>Hareket gir</a>
+    <div class="d-flex flex-wrap gap-2">
+        <partial name="Partials/_ExportMenu" model="@Url.Action("Export")" />
+        <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i>Hareket gir</a>
+    </div>
 </div>
 
 <div class="card">

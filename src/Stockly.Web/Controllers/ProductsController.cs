@@ -18,6 +18,15 @@ public class ProductsController(ProductService products, Lookups lookups, ImageS
         Suppliers = await lookups.SuppliersAsync(),
     });
 
+    /// <summary>Downloads the products that match the current filters (all pages) as Excel or CSV.</summary>
+    [HttpGet("export")]
+    public async Task<IActionResult> Export([FromQuery] ProductQuery query, [FromQuery] string format = "xlsx")
+    {
+        var rows = await products.GetAllAsync(query);
+        var (content, type, name) = Exports.Build(rows, Exports.ProductColumns, format, "stockly-urunler", "Ürünler");
+        return File(content, type, name);
+    }
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Detail(int id)
     {

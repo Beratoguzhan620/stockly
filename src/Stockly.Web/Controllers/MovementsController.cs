@@ -18,6 +18,15 @@ public class MovementsController(StockService stock, Lookups lookups) : Controll
         Products = await lookups.ProductsAsync(),
     });
 
+    /// <summary>Downloads the movements that match the current filters (all pages) as Excel or CSV.</summary>
+    [HttpGet("export")]
+    public async Task<IActionResult> Export([FromQuery] MovementQuery query, [FromQuery] string format = "xlsx")
+    {
+        var rows = await stock.GetAllMovementsAsync(query);
+        var (content, type, name) = Exports.Build(rows, Exports.MovementColumns, format, "stockly-hareketler", "Hareketler");
+        return File(content, type, name);
+    }
+
     [HttpGet("new")]
     public async Task<IActionResult> Create([FromQuery] int? productId, [FromQuery] MovementType type = MovementType.In) =>
         View(await FillAsync(new StockEntryViewModel { ProductId = productId ?? 0, Type = type }));

@@ -1,0 +1,18 @@
+@model string
+@* Model: the export URL without the format; the current query string is kept so the file matches the filters. *@
+@{
+    var query = Context.Request.QueryString.Value ?? string.Empty;
+    query = string.Join('&', query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries).Where(p => !p.StartsWith("page=", StringComparison.OrdinalIgnoreCase)));
+    string ExportUrl(string format) => $"{Model}?{(query.Length > 0 ? query + "&" : "")}format={format}";
+}
+<div class="dropdown">
+    <button class="btn btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-download"></i>Dışa aktar
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item d-flex align-items-center gap-2" href="@ExportUrl("xlsx")"><i class="bi bi-file-earmark-spreadsheet"></i>Excel (.xlsx)</a></li>
+        <li><a class="dropdown-item d-flex align-items-center gap-2" href="@ExportUrl("csv")"><i class="bi bi-filetype-csv"></i>CSV</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><span class="dropdown-item-text small text-muted">Filtrelere uyan tüm kayıtlar</span></li>
+    </ul>
+</div>
