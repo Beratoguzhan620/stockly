@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: Build and test
     runs-on: ubuntu-latest
 
     steps:
@@ -24,7 +24,41 @@ jobs:
       - name: Build
         run: dotnet build Stockly.slnx --no-restore --configuration Release
 
+      - name: Test
+        run: dotnet test tests/Stockly.Application.Tests/Stockly.Application.Tests.csproj --no-build --configuration Release --logger "console;verbosity=normal"
+
       - name: Check for model changes without a migration
         run: |
           dotnet tool install --global dotnet-ef --version 10.0.9
           dotnet ef migrations has-pending-model-changes --project src/Stockly.Data --startup-project src/Stockly.Web --no-build --configuration Release
+
+  docker:
+    name: Docker Compose
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start the stack
+        run: docker compose up --build --detach --wait --wait-timeout 300
+
+      - name: Check the app
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8080/ > /dev/null; then break; fi
+            sleep 3
+          done
+          curl -sf http://localhost:8080/ | grep -q "Stockly"
+          curl -sf http://localhost:8080/products | grep -q "KAG-001"
+          curl -sf -o products.xlsx -w '%{content_type}\n' "http://localhost:8080/products/export?format=xlsx" | grep -q "spreadsheetml"
+          unzip -l products.xlsx | grep -q "xl/worksheets/sheet1.xml"
+          echo "Stockly is up and exports work."
+
+      - name: Show logs
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Stop the stack
+        if: always()
+        run: docker compose down --volumes
+

@@ -146,6 +146,19 @@ for (const [device, options] of Object.entries(viewports)) {
 
     await page.goto(`${baseUrl}/movements?type=Count`);
     await shot(page, `${device}-movements-count`);
+
+    // Exports keep the current filters.
+    await page.goto(`${baseUrl}/products?stock=Critical`);
+    await page.click("button:has-text('Dışa aktar')");
+    await page.waitForTimeout(300);
+    await shot(page, `${device}-export-menu`);
+    for (const format of ["xlsx", "csv"]) {
+      const [download] = await Promise.all([page.waitForEvent("download"), page.click(`a[href*='format=${format}']`)]);
+      const name = download.suggestedFilename();
+      console.log(`downloaded ${name}`);
+      if (!name.endsWith(`.${format}`)) problems.push(`export: expected a .${format} file, got ${name}`);
+      if (format === "xlsx") await page.click("button:has-text('Dışa aktar')");
+    }
   }
 
   if (device === "mobile") {
