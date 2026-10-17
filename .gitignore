@@ -34,3 +34,6 @@ desktop.ini
 # UI preview
 tests/ui/node_modules/
 tests/ui/output/
+
+# Local data protection keys
+**/data-protection-keys/

@@ -1,4 +1,5 @@
 using System.Globalization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Stockly.Application;
@@ -17,6 +18,14 @@ builder.Services.AddStocklyServices();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<Stockly.Web.Infrastructure.ImageStorage>();
 builder.Services.AddScoped<Stockly.Web.Infrastructure.Lookups>();
+
+// Keys that protect cookies and antiforgery tokens survive restarts (and container rebuilds when the
+// folder is a volume); override with DataProtection__KeysPath.
+var keysPath = builder.Configuration["DataProtection:KeysPath"]
+    ?? Path.Combine(builder.Environment.ContentRootPath, "data-protection-keys");
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
+    .SetApplicationName("Stockly");
 
 var app = builder.Build();
 
