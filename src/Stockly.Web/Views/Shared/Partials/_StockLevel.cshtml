@@ -1,0 +1,12 @@
+@model (int Quantity, int Critical, ProductUnit Unit)
+@{
+    var css = Model.Quantity == 0 ? "stock-level out" : Model.Quantity <= Model.Critical ? "stock-level low" : "stock-level";
+    var label = Model.Quantity == 0 ? "Tükendi" : Model.Quantity <= Model.Critical ? "Kritik" : null;
+}
+<span class="@css">
+    <span class="font-mono">@Display.Number(Model.Quantity)</span> <span class="unit">@Display.Unit(Model.Unit)</span>
+    @if (label is not null)
+    {
+        <span class="badge @(Model.Quantity == 0 ? "badge-danger" : "badge-warning")">@label</span>
+    }
+</span>

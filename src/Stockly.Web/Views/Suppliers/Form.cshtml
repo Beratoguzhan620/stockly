@@ -1,0 +1,59 @@
+@model SupplierFormViewModel
+@{
+    var isEdit = Model.Id is not null;
+    ViewData["Title"] = isEdit ? "Tedarikçiyi düzenle" : "Yeni tedarikçi";
+}
+
+<div class="page-header">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-action="Index">Tedarikçiler</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@(isEdit ? "Düzenle" : "Yeni")</li>
+            </ol>
+        </nav>
+        <h1>@ViewData["Title"]</h1>
+    </div>
+</div>
+
+<form class="card form-card" method="post" asp-action="@(isEdit ? "Edit" : "Create")" asp-route-id="@Model.Id" novalidate>
+    <div class="card-body p-4">
+        <partial name="Partials/_ViewMessages" />
+        <div class="row g-3 mb-4">
+            <div class="col-12">
+                <label class="form-label" asp-for="Name"></label>
+                <input class="form-control" asp-for="Name" placeholder="Ör. Marmara Kırtasiye Toptan" />
+                <span asp-validation-for="Name"></span>
+            </div>
+            <div class="col-sm-6">
+                <label class="form-label" asp-for="ContactName"></label>
+                <input class="form-control" asp-for="ContactName" autocomplete="name" />
+            </div>
+            <div class="col-sm-6">
+                <label class="form-label" asp-for="Phone"></label>
+                <input class="form-control" asp-for="Phone" type="tel" autocomplete="tel" />
+            </div>
+            <div class="col-12">
+                <label class="form-label" asp-for="Email"></label>
+                <input class="form-control" asp-for="Email" type="email" autocomplete="email" />
+                <span asp-validation-for="Email"></span>
+            </div>
+            <div class="col-12">
+                <label class="form-label" asp-for="Address"></label>
+                <textarea class="form-control" asp-for="Address" rows="2"></textarea>
+            </div>
+            <div class="col-12">
+                <label class="form-label" asp-for="Note"></label>
+                <textarea class="form-control" asp-for="Note" rows="2" placeholder="Ör. teslim süresi, ödeme koşulu"></textarea>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">@(isEdit ? "Kaydet" : "Tedarikçiyi ekle")</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Vazgeç</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -18,29 +18,30 @@
         <h1>Özet</h1>
         <p>Stoğun bugünkü durumu, kritik ürünler ve son hareketler.</p>
     </div>
+    <a class="btn btn-primary" asp-controller="Movements" asp-action="Create"><i class="bi bi-plus-lg"></i>Hareket gir</a>
 </div>
 
 <div class="stat-grid">
-    <div class="stat-card">
+    <a class="stat-card" asp-controller="Products" asp-action="Index">
         <span class="label"><i class="bi bi-box-seam"></i>Aktif ürün</span>
         <span class="value">@Display.Number(Model.ActiveProducts)</span>
         <span class="hint">@Display.Number(Model.TotalUnits) birim stokta</span>
-    </div>
+    </a>
     <div class="stat-card">
         <span class="label"><i class="bi bi-cash-stack"></i>Stok değeri</span>
         <span class="value">@Display.Money(Model.StockValue)</span>
         <span class="hint">alış fiyatıyla</span>
     </div>
-    <div class="stat-card @(Model.CriticalCount > 0 ? "attention" : null)">
+    <a class="stat-card @(Model.CriticalCount > 0 ? "attention" : null)" asp-controller="Products" asp-action="Index" asp-route-stock="Critical">
         <span class="label"><i class="bi bi-exclamation-triangle"></i>Kritik seviyede</span>
         <span class="value">@Model.CriticalCount</span>
         <span class="hint">@(Model.OutOfStockCount > 0 ? $"{Model.OutOfStockCount} ürün tükendi" : "tükenen ürün yok")</span>
-    </div>
-    <div class="stat-card">
+    </a>
+    <a class="stat-card" asp-controller="Suppliers" asp-action="Index">
         <span class="label"><i class="bi bi-truck"></i>Tedarikçi</span>
         <span class="value">@Model.SupplierCount</span>
         <span class="hint">aktif</span>
-    </div>
+    </a>
 </div>
 
 <div class="row g-4">
@@ -83,7 +84,7 @@
 
     <div class="col-xl-5">
         <section class="card h-100" aria-labelledby="criticalTitle">
-            <div class="card-header"><h2 class="h6 mb-0" id="criticalTitle">Kritik seviyedeki ürünler</h2></div>
+            <div class="card-header d-flex justify-content-between align-items-center"><h2 class="h6 mb-0" id="criticalTitle">Kritik seviyedeki ürünler</h2><a class="small" asp-controller="Products" asp-action="Index" asp-route-stock="Critical">Tümü</a></div>
             @if (Model.CriticalProducts.Count == 0)
             {
                 <partial name="Partials/_EmptyState" model="@(("Kritik ürün yok", "Tüm ürünler kritik seviyenin üstünde.", "bi-check2-circle"))" />
@@ -95,7 +96,7 @@
                     {
                         <li class="list-group-item d-flex justify-content-between align-items-center gap-3">
                             <span class="min-w-0">
-                                <span class="d-block fw-medium text-truncate">@p.Name</span>
+                                <a class="d-block fw-medium text-truncate" asp-controller="Products" asp-action="Detail" asp-route-id="@p.Id">@p.Name</a>
                                 <span class="d-block text-muted small"><span class="font-mono">@p.Sku</span>@(p.SupplierName is null ? "" : $" · {p.SupplierName}")</span>
                             </span>
                             <span class="text-end text-nowrap">
@@ -111,7 +112,7 @@
 </div>
 
 <section class="card mt-4" aria-labelledby="recentTitle">
-    <div class="card-header"><h2 class="h6 mb-0" id="recentTitle">Son hareketler</h2></div>
+    <div class="card-header d-flex justify-content-between align-items-center"><h2 class="h6 mb-0" id="recentTitle">Son hareketler</h2><a class="small" asp-controller="Movements" asp-action="Index">Tümü</a></div>
     @if (Model.RecentMovements.Count == 0)
     {
         <partial name="Partials/_EmptyState" model="@(("Henüz hareket yok", "Stok girişi veya çıkışı yapıldığında burada görünür.", "bi-arrow-left-right"))" />
@@ -127,7 +128,7 @@
                     @foreach (var m in Model.RecentMovements)
                     {
                         <tr>
-                            <td class="fw-medium">@m.ProductName</td>
+                            <td><a class="fw-medium" asp-controller="Products" asp-action="Detail" asp-route-id="@m.ProductId">@m.ProductName</a></td>
                             <td><span class="@Display.MovementBadge(m.Type)">@Display.Movement(m.Type)</span></td>
                             <td class="num">@Display.Signed(m.Quantity)</td>
                             <td class="num">@m.BalanceAfter @Display.Unit(m.Unit)</td>

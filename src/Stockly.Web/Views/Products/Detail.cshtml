@@ -1,0 +1,185 @@
+@model Stockly.Application.Products.ProductDetail
+@{
+    var p = Model.Product;
+    ViewData["Title"] = p.Name;
+    var returnUrl = Context.Request.Path.ToString();
+    var low = p.StockQuantity <= p.CriticalLevel;
+}
+
+<partial name="Partials/_ViewMessages" />
+
+<div class="page-header">
+    <div class="min-w-0">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-action="Index">Ürünler</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><span class="font-mono">@p.Sku</span></li>
+            </ol>
+        </nav>
+        <h1>@p.Name</h1>
+        <p>
+            @Model.CategoryName
+            @if (Model.SupplierName is not null) { <text> · @Model.SupplierName</text> }
+            @if (!p.IsActive) { <span class="badge badge-neutral ms-1">Arşivde</span> }
+        </p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@p.Id"><i class="bi bi-pencil"></i>Düzenle</a>
+        @if (p.IsActive)
+        {
+            <form method="post" asp-action="Archive" asp-route-id="@p.Id">
+                <button class="btn btn-ghost" type="submit" data-confirm="Ürün listelerden kalkar; hareket geçmişi korunur." data-confirm-title="Ürünü arşivle" data-confirm-ok="Arşivle">Arşivle</button>
+            </form>
+        }
+        else
+        {
+            <form method="post" asp-action="Restore" asp-route-id="@p.Id">
+                <button class="btn btn-ghost" type="submit">Arşivden çıkar</button>
+            </form>
+        }
+    </div>
+</div>
+
+<div class="stat-grid">
+    <div class="stat-card @(low ? "attention" : null)">
+        <span class="label"><i class="bi bi-box-seam"></i>Stok</span>
+        <span class="value">@Display.Number(p.StockQuantity) <small class="unit-label">@Display.Unit(p.Unit)</small></span>
+        <span class="hint">kritik seviye: @p.CriticalLevel</span>
+    </div>
+    <div class="stat-card">
+        <span class="label"><i class="bi bi-hourglass-split"></i>Yeterlilik</span>
+        <span class="value">@(Model.DaysOfCover is int days ? $"{days} gün" : "—")</span>
+        <span class="hint">son 30 günün çıkış hızıyla</span>
+    </div>
+    <div class="stat-card">
+        <span class="label"><i class="bi bi-arrow-down-left"></i>Son 30 gün</span>
+        <span class="value">+@Model.UnitsInLast30Days / −@Model.UnitsOutLast30Days</span>
+        <span class="hint">giriş / çıkış</span>
+    </div>
+    <div class="stat-card">
+        <span class="label"><i class="bi bi-cash-stack"></i>Stok değeri</span>
+        <span class="value">@Display.Money(p.StockQuantity * p.PurchasePrice)</span>
+        <span class="hint">alış @Display.Money(p.PurchasePrice) · satış @Display.Money(p.SalePrice)</span>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-4 order-xl-2">
+        <section class="card" aria-labelledby="entryTitle">
+            <div class="card-header"><h2 class="h6 mb-0" id="entryTitle">Stok hareketi gir</h2></div>
+            <div class="card-body">
+                @if (!p.IsActive)
+                {
+                    <p class="text-muted small mb-0">Arşivdeki ürüne hareket girmek için önce arşivden çıkarın.</p>
+                }
+                else
+                {
+                    <ul class="nav nav-segmented mb-3" role="tablist">
+                        <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#entryIn" type="button" role="tab" aria-controls="entryIn" aria-selected="true">Giriş</button></li>
+                        <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#entryOut" type="button" role="tab" aria-controls="entryOut" aria-selected="false">Çıkış</button></li>
+                        <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#entryCount" type="button" role="tab" aria-controls="entryCount" aria-selected="false">Sayım</button></li>
+                    </ul>
+                    <div class="tab-content">
+                        <form class="tab-pane fade show active" id="entryIn" role="tabpanel" method="post" asp-controller="Movements" asp-action="Create">
+                            <input type="hidden" name="ProductId" value="@p.Id" />
+                            <input type="hidden" name="Type" value="In" />
+                            <input type="hidden" name="ReturnUrl" value="@returnUrl" />
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label class="form-label" for="inQuantity">Miktar</label>
+                                    <input class="form-control" id="inQuantity" name="Quantity" type="number" min="1" value="1" required />
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label" for="inCost">Birim maliyet</label>
+                                    <input class="form-control" id="inCost" name="UnitCost" type="number" min="0" step="0.01" value="@p.PurchasePrice.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label" for="inNote">Not</label>
+                                    <input class="form-control" id="inNote" name="Note" maxlength="250" placeholder="Ör. irsaliye no" />
+                                </div>
+                            </div>
+                            <button class="btn btn-primary w-100 mt-3" type="submit">Girişi kaydet</button>
+                        </form>
+                        <form class="tab-pane fade" id="entryOut" role="tabpanel" method="post" asp-controller="Movements" asp-action="Create">
+                            <input type="hidden" name="ProductId" value="@p.Id" />
+                            <input type="hidden" name="Type" value="Out" />
+                            <input type="hidden" name="ReturnUrl" value="@returnUrl" />
+                            <label class="form-label" for="outQuantity">Miktar</label>
+                            <input class="form-control" id="outQuantity" name="Quantity" type="number" min="1" max="@p.StockQuantity" value="1" required />
+                            <div class="form-text">Stokta @p.StockQuantity @Display.Unit(p.Unit) var.</div>
+                            <label class="form-label mt-2" for="outNote">Not</label>
+                            <input class="form-control" id="outNote" name="Note" maxlength="250" placeholder="Ör. satış, fire" />
+                            <button class="btn btn-primary w-100 mt-3" type="submit">Çıkışı kaydet</button>
+                        </form>
+                        <form class="tab-pane fade" id="entryCount" role="tabpanel" method="post" asp-controller="Movements" asp-action="Create">
+                            <input type="hidden" name="ProductId" value="@p.Id" />
+                            <input type="hidden" name="Type" value="Count" />
+                            <input type="hidden" name="ReturnUrl" value="@returnUrl" />
+                            <label class="form-label" for="countQuantity">Sayılan miktar</label>
+                            <input class="form-control" id="countQuantity" name="Quantity" type="number" min="0" value="@p.StockQuantity" required />
+                            <div class="form-text">Sistemdeki stok: @p.StockQuantity. Fark ayrı bir hareket olarak kaydedilir.</div>
+                            <label class="form-label mt-2" for="countNote">Not</label>
+                            <input class="form-control" id="countNote" name="Note" maxlength="250" placeholder="Ör. ay sonu sayımı" />
+                            <button class="btn btn-primary w-100 mt-3" type="submit">Sayımı kaydet</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="card mt-4" aria-labelledby="infoTitle">
+            <div class="card-header"><h2 class="h6 mb-0" id="infoTitle">Ürün bilgileri</h2></div>
+            <div class="card-body">
+                @if (p.ImageUrl is not null)
+                {
+                    <img class="product-photo mb-3" src="@p.ImageUrl" alt="@p.Name" />
+                }
+                <dl class="spec-list mb-0">
+                    <dt>SKU</dt><dd class="font-mono">@p.Sku</dd>
+                    <dt>Barkod</dt><dd class="font-mono">@(p.Barcode ?? "—")</dd>
+                    <dt>Birim</dt><dd>@Display.Unit(p.Unit)</dd>
+                    <dt>Tedarikçi</dt><dd>@(Model.SupplierName ?? "—")</dd>
+                    @if (!string.IsNullOrWhiteSpace(p.Description))
+                    {
+                        <dt>Açıklama</dt><dd>@p.Description</dd>
+                    }
+                </dl>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-xl-8 order-xl-1">
+        <section class="card" aria-labelledby="historyTitle">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="h6 mb-0" id="historyTitle">Hareket geçmişi</h2>
+                <a class="small" asp-controller="Movements" asp-action="Index" asp-route-productId="@p.Id">Tümü</a>
+            </div>
+            @if (Model.RecentMovements.Count == 0)
+            {
+                <partial name="Partials/_EmptyState" model="@(("Henüz hareket yok", "İlk girişi sağdaki formdan yapabilirsiniz.", "bi-arrow-left-right"))" />
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr><th>Tarih</th><th>Tür</th><th class="num">Miktar</th><th class="num">Kalan</th><th>Not</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var m in Model.RecentMovements)
+                            {
+                                <tr>
+                                    <td class="text-muted text-nowrap">@Display.DateTime(m.OccurredAt)</td>
+                                    <td><span class="@Display.MovementBadge(m.Type)">@Display.Movement(m.Type)</span></td>
+                                    <td class="num @(m.Quantity > 0 ? "text-success" : null)">@Display.Signed(m.Quantity)</td>
+                                    <td class="num">@m.BalanceAfter</td>
+                                    <td class="text-muted">@m.Note</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+    </div>
+</div>

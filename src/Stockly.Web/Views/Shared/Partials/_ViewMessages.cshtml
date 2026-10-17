@@ -7,6 +7,11 @@
         .ToList();
     var success = ViewBag.SuccessMessage as string ?? TempData["SuccessMessage"] as string;
     var error = ViewBag.ErrorMessage as string ?? TempData["ErrorMessage"] as string;
+    var warning = TempData["WarningMessage"] as string;
+}
+@if (!string.IsNullOrWhiteSpace(warning))
+{
+    <div class="alert alert-warning" role="status"><i class="bi bi-exclamation-triangle"></i><span>@warning</span></div>
 }
 @if (!string.IsNullOrWhiteSpace(success))
 {
