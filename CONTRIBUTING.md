@@ -10,7 +10,7 @@ Bu dosya Stockly üzerinde yapılan her değişiklik için geçerlidir.
 ## Commit mesajları
 - Conventional Commits, İngilizce, emir kipinde: `feat: add course assignment submission`, `fix: ...`, `refactor: ...`, `docs: ...`, `test: ...`, `chore: ...`, `style: ...`
 - Küçük ve anlamlı commit'ler; bir commit tek bir mantıksal değişiklik.
-- Commit mesajlarına ve PR açıklamalarına araç/otomasyon imzası, `Co-Authored-By` satırı veya "generated with" ibaresi eklenmez.
+- Commit mesajları ve PR açıklamaları yalnızca değişikliği anlatır; ek imza ya da etiket satırı eklenmez.
 
 ## Kod
 - Değişken, sınıf ve metot adları İngilizce; arayüz metinleri Türkçe.
