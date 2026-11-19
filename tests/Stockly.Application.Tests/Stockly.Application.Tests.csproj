@@ -18,12 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- SQLite is only used here as a throwaway in-memory database for tests; it never ships with the
-         app and never runs untrusted SQL. Remove once Microsoft.Data.Sqlite pulls a patched native build. -->
-    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\src\Stockly.Application\Stockly.Application.csproj" />
   </ItemGroup>
 
