@@ -29,6 +29,9 @@ public sealed class SqliteDemoTests : IDisposable
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         Assert.Equal(30, await context.Products.CountAsync());
         Assert.True(await context.StockMovements.AnyAsync());
+        // Decimal columns can be ordered and summed in SQL on SQLite too (stored as REAL there).
+        Assert.True(await context.Products.OrderByDescending(p => p.SalePrice).Select(p => p.SalePrice).FirstAsync() > 0);
+        Assert.True(await context.Products.SumAsync(p => p.PurchasePrice * p.StockQuantity) > 0);
     }
 
     [Fact]
