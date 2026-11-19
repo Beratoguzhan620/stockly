@@ -6,4 +6,10 @@
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- SQLitePCLRaw.lib.e_sqlite3 2.1.11 (through Microsoft.EntityFrameworkCore.Sqlite) is reported for the SQLite it
+         bundles. The native SQLite actually loaded comes from SourceGear.sqlite3 in Stockly.Data, a build with the fix;
+         a test checks the version at run time. -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-2m69-gcr7-jv3q" />
+  </ItemGroup>
 </Project>
