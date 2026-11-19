@@ -12,6 +12,8 @@ Stock management for a small shop: products with SKU and barcode, goods in and o
 
 ## Try it
 
+**Live demo:** [stockly-demo.onrender.com](https://stockly-demo.onrender.com). A stationery shop with 30 products, four suppliers and six months of goods in and out; a few products are already below their critical level. It runs on a free server with SQLite inside the container, so every restart starts again from the same data; after a quiet spell the first visit can take about a minute.
+
 ```bash
 docker compose up --build
 ```

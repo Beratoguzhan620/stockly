@@ -12,6 +12,8 @@ Küçük bir dükkân için stok yönetimi: SKU ve barkodlu ürünler, giriş-ç
 
 ## Deneyin
 
+**Canlı demo:** [stockly-demo.onrender.com](https://stockly-demo.onrender.com). 30 ürünü, dört tedarikçisi ve altı aylık giriş çıkışıyla bir kırtasiye; birkaç ürün şimdiden kritik seviyenin altında. Ücretsiz bir sunucuda, veritabanı konteynerin içinde SQLite olarak çalışıyor; her yeniden başlatmada aynı verilerle baştan açılır. Bir süre kimse açmadıysa ilk açılış bir dakika kadar sürebilir.
+
 ```bash
 docker compose up --build
 ```
