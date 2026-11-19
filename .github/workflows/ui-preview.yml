@@ -12,7 +12,8 @@ permissions:
 
 jobs:
   screenshots:
-    runs-on: ubuntu-latest
+    # Playwright has no Chromium build for the newer runner image yet.
+    runs-on: ubuntu-24.04
 
     services:
       sqlserver:

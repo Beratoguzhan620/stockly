@@ -1,0 +1,25 @@
+# The public demo on Render's free plan: one web service from the Dockerfile, with SQLite in a file inside the
+# container. Every restart (the free plan sleeps after 15 idle minutes) starts from a fresh copy of the demo data,
+# so each visitor finds the stationery shop as it was seeded. Nothing secret is in here.
+services:
+  - type: web
+    name: stockly-demo
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: Database__Provider
+        value: Sqlite
+      - key: ConnectionStrings__DefaultConnection
+        value: Data Source=/tmp/stockly.db
+      - key: Seed__DemoContent
+        value: "true"
+      - key: TZ
+        value: Europe/Istanbul
+      - key: ASPNETCORE_FORWARDEDHEADERS_ENABLED
+        value: "true"
+      - key: PORT
+        value: "8080"
