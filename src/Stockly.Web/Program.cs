@@ -13,7 +13,7 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
 });
 
-builder.Services.AddStocklyData(builder.Configuration.GetConnectionString("DefaultConnection"));
+builder.Services.AddStocklyData(builder.Configuration.GetConnectionString("DefaultConnection"), builder.Configuration["Database:Provider"]);
 builder.Services.AddStocklyServices();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<Stockly.Web.Infrastructure.ImageStorage>();
